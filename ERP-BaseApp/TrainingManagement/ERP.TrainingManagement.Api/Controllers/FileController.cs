@@ -30,12 +30,13 @@ namespace ERP.TrainingManagement.Api.Controllers
             _mapper = mapper;
         }
 
-        [HttpPost("upload/cv")]
-       [Authorize(Roles = "Student")]
-        public async Task<IActionResult> UploadCv([FromForm] UploadFileRequest request)
+        [HttpPost("upload/cv/{vacancyId:guid}")]
+        //[Authorize(Roles = "Student")]
+        public async Task<IActionResult> UploadCv([FromForm] UploadFileRequest request, Guid vacancyId)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var studentId = Guid.Parse(userId);
+
 
             using (var memoryStream = new MemoryStream())
             {
@@ -46,7 +47,10 @@ namespace ERP.TrainingManagement.Api.Controllers
                     StudentId = studentId,
                     FileName = request.File.FileName,
                     FileData = memoryStream.ToArray(),
-                    UploadDate = DateTime.UtcNow
+                    UploadDate = DateTime.UtcNow,
+                    VacancyId = vacancyId,
+
+
                 };
 
                 await _unitOfWork.FileRepository.AddCv(cvUpload);
@@ -115,7 +119,7 @@ namespace ERP.TrainingManagement.Api.Controllers
         }
 
         [HttpPost("upload/registration-letter")]
- [Authorize(Roles = "Student")]
+        [Authorize(Roles = "Student")]
         public async Task<IActionResult> UploadRegistrationLetter([FromForm] UploadFileRequest request)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -140,7 +144,19 @@ namespace ERP.TrainingManagement.Api.Controllers
             return Ok();
         }
 
-      
+        [HttpGet("vacancy/{vacancyId:guid}")]
+        public async Task<IActionResult> GetCVUploadsByVacancyId(Guid vacancyId)
+        {
+            var cvUploads = await _unitOfWork.FileRepository.GetCVUploadsByVacancyIdAsync(vacancyId);
+            if (cvUploads == null || cvUploads.Count == 0)
+            {
+                return NotFound();
+            }
+
+            return Ok(cvUploads);
+        }
+
+
     }
 }
 

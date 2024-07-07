@@ -19,10 +19,10 @@ namespace ERP.TrainingManagement.DataServices.Repository.Interfaces
         private readonly AppDbContext _context;
         private readonly ILogger<FileRepository> _logger;
 
-        public FileRepository(AppDbContext context) 
+        public FileRepository(AppDbContext context)
         {
             _context = context;
-          
+
         }
 
         public async Task AddCv(CVUpload cvUpload)
@@ -38,6 +38,13 @@ namespace ERP.TrainingManagement.DataServices.Repository.Interfaces
         public async Task<IEnumerable<CVUpload>> GetCvsByStudentIdAsync(Guid studentId)
         {
             return await _context.CVUploads.Where(c => c.StudentId == studentId).ToListAsync();
+        }
+
+        public async Task<List<CVUpload>> GetCVUploadsByVacancyIdAsync(Guid vacancyId)
+        {
+            return await _context.CVUploads
+                .Where(c => c.VacancyId == vacancyId)
+                .ToListAsync();
         }
 
         public async Task<IEnumerable<RegistartionLetterUpload>> GetRegistrationLettersByStudentIdAsync(Guid studentId)
